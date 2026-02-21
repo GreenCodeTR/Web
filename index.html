@@ -160,38 +160,44 @@
         .menu-item { display: flex; align-items: center; justify-content: flex-start; gap: 10px; font-size: 1em; color: var(--text-color); }
         .menu-icon { opacity: 0.8; font-size: 1.2em; }
 
+        /* EKRAN KÜÇÜLDÜĞÜNDE (TABLET VE MOBİL) YAPILACAKLAR */
         @media (max-width: 1300px) { 
-            .tables-wrapper { grid-template-columns: 1fr; } 
-            .main-wrapper { grid-template-columns: 320px 1fr; }
+            .main-wrapper { grid-template-columns: 320px 1fr; height: auto; }
+            
+            /* Dış çerçeveyi tek bir kutu gibi yapıyoruz */
+            .tables-wrapper { 
+                grid-template-columns: 1fr; 
+                gap: 0; 
+                height: auto; 
+                border-radius: 16px; 
+                border: 1px solid var(--border-color);
+                overflow: hidden;
+            } 
+            
+            /* İçerideki kartların kendi sınırlarını kaldırıyoruz ki birleşsinler */
+            .table-card { 
+                border: none; 
+                border-radius: 0; 
+                height: auto; 
+            }
+            
+            /* İkinci tablonun başlığını gizliyoruz ki liste kesilmeden devam etsin */
+            #table2 thead { 
+                display: none; 
+            }
         }
+
+        /* TAM MOBİL GÖRÜNÜM (TELEFONLAR) */
         @media (max-width: 800px) {
-            .main-wrapper { grid-template-columns: 1fr; height: auto; display: flex; flex-direction: column; }
+            .main-wrapper { grid-template-columns: 1fr; display: flex; flex-direction: column; }
             body { height: auto; overflow: auto; padding: 10px; }
-            
-            /* 1. Ayarlar menüsünü mobilde tek sütun yap */
-            .old-settings-layout { grid-template-columns: 1fr; }
-            
-            /* 2. İki ayrı 15 günlük tabloyu mobilde birleştirip tek tablo gibi göster */
-            .tables-wrapper { gap: 0; }
-            .tables-wrapper .table-card:nth-child(1) { 
-                border-bottom-left-radius: 0; 
-                border-bottom-right-radius: 0; 
-                border-bottom: none; 
-            }
-            .tables-wrapper .table-card:nth-child(2) { 
-                border-top-left-radius: 0; 
-                border-top-right-radius: 0; 
-            }
-            #table2 thead { display: none; } /* İkinci tablonun başlığını gizle */
-            
-            /* 3. Mobilde tabloların daralıp metinleri ezmesini engelle, yatay kaydırma ekle */
-            .right-panel { max-width: 100%; overflow: hidden; }
-            .table-card { overflow-x: auto; }
-            table { min-width: 600px; } 
         }
+
         @media (max-width: 600px) {
             .daily-banner-modal { grid-template-columns: 1fr; }
-            .modal-times { grid-template-columns: repeat(2, 1fr); } /* Vakit kutularını 2'li sırala */
+            .modal-times { grid-template-columns: repeat(3, 1fr); }
+            /* Telefondaki yazı boyutlarını biraz daha okunaklı yapalım */
+            table { font-size: 0.85em; } 
         }
     </style>
 </head>
@@ -552,7 +558,7 @@
         } catch (e) { console.log(e); }
     }
 
-    function startCountdown() {
+   function startCountdown() {
         allEvents.sort((a,b) => a.t - b.t);
         clearInterval(countdownInterval);
         
@@ -562,8 +568,8 @@
             const next = futureEvents[0]; // Mutlak sıradaki vakit (örn: Öğle)
             const nextFast = futureEvents.find(e => e.isFast); // Sıradaki oruç hedefi (İftar veya İmsak)
             
+            // ANA SAYAÇ EKRANI (İftar / İmsak)
             if(nextFast) {
-                // ANA SAYAÇ (İftar / İmsak)
                 const diffFast = nextFast.t - now;
                 const hF = Math.floor(diffFast / 3600000); 
                 const mF = Math.floor((diffFast % 3600000) / 60000); 
@@ -573,43 +579,53 @@
                 document.getElementById('mainCountdownTitle').innerText = `${nextFast.n} Vaktine Kalan`;
                 document.getElementById('mainCountdownTimer').innerText = `${pad(hF)}:${pad(mF)}:${pad(sF)}`;
                 document.getElementById('mainCountdownTitle').style.color = nextFast.isI ? 'var(--iftar-color)' : 'var(--accent)';
-                
-                // 15 Dakika Uyarısı (Sadece İftar ve İmsak için)
-                if (diffFast < 900000) {
-                    document.getElementById('mainCountdownTimer').classList.add('warning-15');
-                    if (mF === 15 && sF === 0 && !warningPlayed && document.getElementById('soundToggle').checked) {
-                        document.getElementById('sound_warning').play();
-                        warningPlayed = true;
-                    }
-                } else {
-                    document.getElementById('mainCountdownTimer').classList.remove('warning-15');
-                    warningPlayed = false;
-                }
-
-                // ARA SAYAÇ (Öğle, İkindi, Yatsı vb.)
-                if (next && next.n !== nextFast.n) {
-                    document.getElementById('subCountdownContainer').style.display = 'block';
-                    const diffSub = next.t - now;
-                    const hS = Math.floor(diffSub / 3600000); 
-                    const mS = Math.floor((diffSub % 3600000) / 60000); 
-                    const sS = Math.floor((diffSub % 60000) / 1000);
-                    
-                    document.getElementById('subCountdownTitle').innerText = `Sıradaki Vakit (${next.n})`;
-                    document.getElementById('subCountdownTimer').innerText = `${pad(hS)}:${pad(mS)}:${pad(sS)}`;
-                } else {
-                    // Eğer sıradaki zaten iftar veya imsak ise ara sayacı gizle
-                    document.getElementById('subCountdownContainer').style.display = 'none';
-                }
             }
 
-            // TAM SAATİNDE ZİL ÇALMA KONTROLÜ
+            // TÜM VAKİTLER İÇİN KONTROLLER (15 Dk Uyarısı ve Tam Saat Sesi)
             if (next) {
                 const diffNext = next.t - now;
                 const hN = Math.floor(diffNext / 3600000); 
                 const mN = Math.floor((diffNext % 3600000) / 60000); 
                 const sN = Math.floor((diffNext % 60000) / 1000);
-                if(hN===0 && mN===0 && sN===0 && document.getElementById('soundToggle').checked) {
-                    document.getElementById(document.getElementById('soundSelect').value).play();
+                const pad = (n) => String(n).padStart(2, '0');
+
+                // Ara Sayaç (Öğle, İkindi, Yatsı vb.) Görünürlüğü
+                if (nextFast && next.n !== nextFast.n) {
+                    document.getElementById('subCountdownContainer').style.display = 'block';
+                    document.getElementById('subCountdownTitle').innerText = `Sıradaki Vakit (${next.n})`;
+                    document.getElementById('subCountdownTimer').innerText = `${pad(hN)}:${pad(mN)}:${pad(sN)}`;
+                } else {
+                    document.getElementById('subCountdownContainer').style.display = 'none';
+                }
+
+                // --- YENİ: 15 DAKİKA UYARISI (TÜM VAKİTLER İÇİN) ---
+                if (diffNext <= 900000) { // 15 dakika veya daha az kaldıysa
+                    
+                    // Hangi sayacın yanıp söneceğini belirle (Görsel Uyarı)
+                    if (nextFast && next.n === nextFast.n) {
+                        document.getElementById('mainCountdownTimer').classList.add('warning-15');
+                        document.getElementById('subCountdownTimer').classList.remove('warning-15');
+                    } else {
+                        document.getElementById('subCountdownTimer').classList.add('warning-15');
+                        document.getElementById('mainCountdownTimer').classList.remove('warning-15');
+                    }
+
+                    // Sadece tam 15:00'da 1 kere uyarı sesi çal
+                    if (mN === 15 && sN === 0 && !warningPlayed && document.getElementById('soundToggle').checked) {
+                        document.getElementById('sound_warning').play().catch(e => console.log("Ses oynatma engellendi:", e));
+                        warningPlayed = true;
+                    }
+                } else {
+                    // 15 dakikadan fazla varsa görsel uyarıları kaldır
+                    document.getElementById('mainCountdownTimer').classList.remove('warning-15');
+                    document.getElementById('subCountdownTimer').classList.remove('warning-15');
+                    warningPlayed = false; // Bayrağı sıfırla
+                }
+
+                // --- YENİ: TAM SAATİNDE ZİL ÇALMA (TÜM VAKİTLER İÇİN) ---
+                if(hN === 0 && mN === 0 && sN === 0 && document.getElementById('soundToggle').checked) {
+                    const selectedSound = document.getElementById('soundSelect').value;
+                    document.getElementById(selectedSound).play().catch(e => console.log("Ses oynatma engellendi:", e));
                 }
             }
 
