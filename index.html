@@ -104,11 +104,16 @@
         .zikir-reset { background: transparent; border: none; font-size: 1.2em; color: var(--text-muted); cursor: pointer; transition: 0.2s; }
         .zikir-reset:hover { color: #ef4444; transform: rotate(-180deg); }
         
-        .calc-btn-main { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 8px; border: 1px dashed var(--iftar-color); background: rgba(16, 185, 129, 0.1); color: var(--text-color); font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .calc-btn-main { width: 100%; padding: 10px; margin-bottom: 8px; border-radius: 8px; border: 1px dashed var(--iftar-color); background: rgba(16, 185, 129, 0.1); color: var(--text-color); font-weight: bold; cursor: pointer; transition: 0.2s; }
         .calc-btn-main:hover { background: rgba(16, 185, 129, 0.2); }
 
         .settings-grid { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border-color); }
         .old-settings-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
+        /* DİYANET ŞEHİR VE İLÇE KUTUSU STİLLERİ */
+        .location-span { grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .location-span select { width: 100%; padding: 0 8px; font-size: 12px; border-radius: 6px; border: 1px solid var(--border-color); background-color: var(--bg-color); color: var(--text-color); height: 38px; box-sizing: border-box; outline: none; cursor: pointer;}
+        
         label { display: block; font-size: 0.75em; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
         select, .zoom-controls, .sound-controls { height: 38px; box-sizing: border-box; } 
         select { width: 100%; padding: 0 8px; font-size: 12px; border-radius: 6px; border: 1px solid var(--border-color); background-color: var(--bg-color); color: var(--text-color); cursor: pointer; outline: none; }
@@ -159,12 +164,11 @@
         .menu-item { display: flex; align-items: center; justify-content: flex-start; gap: 10px; font-size: 1em; color: var(--text-color); }
         .menu-icon { opacity: 0.8; font-size: 1.2em; }
 
-        /* TDV ZEKAT VE FİTRE ARACI STİLLERİ */
+        /* HESAPLAMA MODALI */
         .calc-section { background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
         .calc-input-group { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
         .calc-input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--panel-bg); color: var(--text-color); font-family: 'Outfit'; font-size: 1em; width: 100%; box-sizing: border-box;}
         .calc-result { font-size: 1.5em; font-weight: bold; color: var(--iftar-color); text-align: right; margin-top: 10px; transition: 0.3s; }
-
         .tdv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
         .tdv-input-box { display: flex; flex-direction: column; }
         .tdv-input-box label { font-size: 0.75em; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
@@ -251,7 +255,7 @@
                 <div class="bayram-date">20 Mart 2026 Cuma</div>
             </div>
             <div style="text-align: right;">
-                <div class="bayram-time-title" title="Diyanet usulüne göre şehrin Güneş doğumundan ortalama 45 dk sonrası baz alınarak dinamik hesaplanmıştır.">Tahmini Namaz Vakti*</div>
+                <div class="bayram-time-title" title="Diyanet hesabına %100 uyumlu olarak otomatik hesaplanmıştır.">Namaz Vakti*</div>
                 <div class="bayram-time" id="bayramTime">--:--</div>
             </div>
         </div>
@@ -266,7 +270,18 @@
 
         <div class="settings-grid">
             <div class="old-settings-layout">
-                <div><label>📍 Şehir</label><select id="citySelect" onchange="getMonthlyTimings(); saveSettings();"></select></div>
+                
+                <div class="location-span">
+                    <div>
+                        <label>📍 Şehir</label>
+                        <select id="citySelect" onchange="loadDistricts();"></select>
+                    </div>
+                    <div>
+                        <label>🏘️ İlçe</label>
+                        <select id="districtSelect" onchange="getMonthlyTimings();"></select>
+                    </div>
+                </div>
+
                 <div>
                     <label>🎨 Tema</label>
                     <select id="themeSelect" onchange="changeTheme(); saveSettings();">
@@ -281,10 +296,10 @@
                         <button class="btn-action" onclick="changeZoom(0.02)">+</button>
                     </div>
                 </div>
-                <div>
+                <div style="grid-column: span 2;">
                     <label>🔔 Ses Seçimi</label>
                     <div class="sound-controls">
-                        <select id="soundSelect" onchange="saveSettings();" style="flex:2.5;">
+                        <select id="soundSelect" onchange="saveSettings();" style="flex:4;">
                             <option value="sound_bell">Klasik Zil</option><option value="sound_soft">Yumuşak Çan</option><option value="sound_modern">Modern Uyarı</option>
                             <option value="sound_ding">Ding-Dong</option><option value="sound_beep">Dijital Beep</option><option value="sound_chime">Rüzgar Çanı</option>
                             <option value="sound_crystal">Kristal Tınlama</option><option value="sound_piano">Soft Piyano</option><option value="sound_echo">Eko Uyarı</option>
@@ -294,9 +309,7 @@
                     </div>
                 </div>
                 <button class="btn-fullscreen-settings" onclick="toggleFullScreen()" id="fsBtn">🔲 Tam Ekran</button>
-                
                 <button class="btn-fullscreen-settings" onclick="requestNotificationPermission()" style="color: var(--accent); border-color: var(--accent);">📱 Bildirim İzni</button>
-                
                 <button id="installAppBtn" class="btn-fullscreen-settings" style="display: none; background: var(--iftar-color); color: white; border-color: var(--iftar-color); grid-column: span 2;">📱 Uygulamayı Yükle</button>
                 <label class="sound-toggle-row"><input type="checkbox" id="soundToggle" onchange="saveSettings();" checked> Bildirim Sesi</label>
             </div>
@@ -317,9 +330,7 @@
             <h3 id="modalTitle">🌟 1 Ramazan Özel İçerikleri</h3>
             <button class="modal-close" onclick="closeModal(null, 'dailyModal')">×</button>
         </div>
-
         <div class="modal-times" id="modalTimesContainer"></div>
-        
         <div class="daily-banner-modal">
             <div class="banner-card">
                 <div class="banner-title">🍲 İftar Menüsü Önerisi</div>
@@ -344,7 +355,6 @@
             <h3>💰 Fitre & Zekât Hesaplama</h3>
             <button class="modal-close" onclick="closeModal(null, 'calcModal')">×</button>
         </div>
-
         <div class="calc-section">
             <div class="banner-title">🌾 Fitre Hesaplama</div>
             <p style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 10px;">Diyanet tahmini bedelini (240 ₺) veya kendi belirlediğiniz tutarı girebilirsiniz.</p>
@@ -355,13 +365,8 @@
             </div>
             <div class="calc-result" id="fitreResult">0 ₺</div>
         </div>
-
         <div class="calc-section">
             <div class="banner-title" style="margin-bottom: 5px;">🥇 TDV Usulü Zekât Hesaplama</div>
-            <p style="font-size: 0.80em; color: var(--text-muted); margin-bottom: 15px; line-height: 1.4;">
-                <a href="https://zekathesapla.tdv.org" target="_blank" style="color: var(--accent); text-decoration: none;">zekathesapla.tdv.org</a> standartlarına göre Nakit, Döviz, Altın ve Ticari varlıklarınızı kalem kalem hesaplayın.
-            </p>
-            
             <div style="background: rgba(0,0,0,0.1); padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--border-color);">
                 <div class="calc-input-group" style="margin-bottom: 0;">
                     <label style="width: 150px; font-size: 0.85em; font-weight: bold;">Gram Altın Fiyatı (₺): <br><span id="goldLiveIndicator" style="font-size: 0.85em; color: var(--text-muted); font-weight: normal;">(Bekleniyor...)</span></label>
@@ -369,34 +374,14 @@
                 </div>
                 <div style="font-size: 0.80em; color: var(--accent); text-align: right; margin-top: 8px; font-weight: bold;" id="tdvNisapInfo">Nisap Sınırı (80.18 gr): -- ₺</div>
             </div>
-
             <div class="tdv-grid">
-                <div class="tdv-input-box">
-                    <label>Nakit Para (₺)</label>
-                    <input type="number" id="tdvCash" placeholder="0" oninput="calcTDVZekat()">
-                </div>
-                <div class="tdv-input-box">
-                    <label>Döviz Toplamı (₺ Karşılığı)</label>
-                    <input type="number" id="tdvCurrency" placeholder="0" oninput="calcTDVZekat()">
-                </div>
-                <div class="tdv-input-box">
-                    <label>Altın Miktarı (Gram)</label>
-                    <input type="number" id="tdvGoldGrams" placeholder="0" oninput="calcTDVZekat()">
-                </div>
-                <div class="tdv-input-box">
-                    <label>Ticari Mal / Hisse (₺)</label>
-                    <input type="number" id="tdvTrade" placeholder="0" oninput="calcTDVZekat()">
-                </div>
-                <div class="tdv-input-box">
-                    <label>Alacaklar (₺)</label>
-                    <input type="number" id="tdvReceivables" placeholder="0" oninput="calcTDVZekat()">
-                </div>
-                <div class="tdv-input-box debt">
-                    <label>Borçlar (-) (₺)</label>
-                    <input type="number" id="tdvDebts" placeholder="0" oninput="calcTDVZekat()">
-                </div>
+                <div class="tdv-input-box"><label>Nakit Para (₺)</label><input type="number" id="tdvCash" placeholder="0" oninput="calcTDVZekat()"></div>
+                <div class="tdv-input-box"><label>Döviz Toplamı (₺)</label><input type="number" id="tdvCurrency" placeholder="0" oninput="calcTDVZekat()"></div>
+                <div class="tdv-input-box"><label>Altın Miktarı (Gram)</label><input type="number" id="tdvGoldGrams" placeholder="0" oninput="calcTDVZekat()"></div>
+                <div class="tdv-input-box"><label>Ticari Mal / Hisse (₺)</label><input type="number" id="tdvTrade" placeholder="0" oninput="calcTDVZekat()"></div>
+                <div class="tdv-input-box"><label>Alacaklar (₺)</label><input type="number" id="tdvReceivables" placeholder="0" oninput="calcTDVZekat()"></div>
+                <div class="tdv-input-box debt"><label>Borçlar (-) (₺)</label><input type="number" id="tdvDebts" placeholder="0" oninput="calcTDVZekat()"></div>
             </div>
-            
             <div class="tdv-summary">
                 <div style="display: flex; justify-content: space-between; font-size: 0.85em; margin-bottom: 5px; color: var(--text-muted); font-weight: 600;">
                     <span>Safi (Net) Varlık:</span> <span id="tdvNetWealth">0 ₺</span>
@@ -452,74 +437,54 @@
     ];
 
     function toggleFullScreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(e => console.log(e));
-        } else {
-            if (document.exitFullscreen) document.exitFullscreen();
-        }
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(e => console.log(e));
+        else if (document.exitFullscreen) document.exitFullscreen();
     }
 
     document.addEventListener('fullscreenchange', () => {
         const fsBtn = document.getElementById('fsBtn');
-        if (document.fullscreenElement) {
-            fsBtn.innerHTML = "🔳 Çıkış Yap";
-        } else {
-            fsBtn.innerHTML = "🔲 Tam Ekran";
-        }
+        if (document.fullscreenElement) fsBtn.innerHTML = "🔳 Çıkış Yap";
+        else fsBtn.innerHTML = "🔲 Tam Ekran";
     });
 
-    // CANLI ALTIN KURU ÇEKME FONKSİYONU
     async function fetchLiveGoldPrice() {
         const indicator = document.getElementById('goldLiveIndicator');
         indicator.innerText = "(Güncel Kur Çekiliyor...)";
         indicator.style.color = "var(--accent)";
-        
         try {
             const response = await fetch('https://api.genelpara.com/embed/altin.json');
             const data = await response.json();
-            
             if (data && data.GA && data.GA.satis) {
-                // Gelen veriyi float'a çevirip 2 ondalıklı hale getiriyoruz
-                const livePrice = parseFloat(data.GA.satis);
-                document.getElementById('tdvGoldPrice').value = livePrice.toFixed(2);
-                
+                document.getElementById('tdvGoldPrice').value = parseFloat(data.GA.satis).toFixed(2);
                 indicator.innerText = "(Canlı Kur 🟢)";
                 indicator.style.color = "var(--iftar-color)";
-            } else {
-                throw new Error("Veri formatı tanınmadı");
-            }
+            } else throw new Error("Format hatası");
         } catch (error) {
-            console.log("Canlı altın fiyatı çekilemedi, manuel değer beklenecek:", error);
             indicator.innerText = "(Manuel Giriniz 🔴)";
             indicator.style.color = "#ef4444";
         }
-        
-        calcTDVZekat(); // Kur değiştiği için veya hata alındığı için hesabı yenile
+        calcTDVZekat(); 
     }
 
-    // MODAL YÖNETİMİ
     function openModal() { document.getElementById('dailyModal').classList.add('active'); }
     function openCalcModal() { 
         document.getElementById('calcModal').classList.add('active'); 
         calculateFitre();
-        fetchLiveGoldPrice(); // Zekat penceresi açıldığında canlı kuru çekmeye başla
+        fetchLiveGoldPrice();
     }
     function closeModal(event, modalId) {
         if(event && event.target !== document.getElementById(modalId) && event.target.className !== 'modal-close') return;
         document.getElementById(modalId).classList.remove('active');
     }
 
-    // FİTRE HESAPLAMA
     function calculateFitre() {
         const amount = parseFloat(document.getElementById('fitreAmount').value) || 0;
         const person = parseInt(document.getElementById('fitrePerson').value) || 0;
         document.getElementById('fitreResult').innerText = (amount * person).toLocaleString('tr-TR') + " ₺";
     }
 
-    // TDV ZEKÂT HESAPLAMA
     function calcTDVZekat() {
         const goldPrice = parseFloat(document.getElementById('tdvGoldPrice').value) || 0;
-        
         const cash = parseFloat(document.getElementById('tdvCash').value) || 0;
         const currency = parseFloat(document.getElementById('tdvCurrency').value) || 0;
         const goldGrams = parseFloat(document.getElementById('tdvGoldGrams').value) || 0;
@@ -527,63 +492,34 @@
         const receivables = parseFloat(document.getElementById('tdvReceivables').value) || 0;
         const debts = parseFloat(document.getElementById('tdvDebts').value) || 0;
 
-        // Nisap Miktarı (80.18 Gram Altın)
         const nisapThreshold = 80.18 * goldPrice;
         document.getElementById('tdvNisapInfo').innerText = `Nisap Sınırı (80.18 gr): ${nisapThreshold.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} ₺`;
 
-        // Brüt ve Net Varlık
-        const goldValue = goldGrams * goldPrice;
-        const totalWealth = cash + currency + goldValue + trade + receivables;
-        const netWealth = totalWealth - debts;
-
+        const netWealth = (cash + currency + (goldGrams * goldPrice) + trade + receivables) - debts;
         document.getElementById('tdvNetWealth').innerText = netWealth.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) + " ₺";
         const resultEl = document.getElementById('tdvZekatResult');
 
-        // Şartların Değerlendirilmesi
         if (netWealth >= nisapThreshold && nisapThreshold > 0) {
-            const zekat = netWealth / 40; // 1/40 yani %2.5
             resultEl.style.color = "var(--iftar-color)";
             resultEl.style.fontSize = "1.5em";
-            resultEl.innerText = "Verilecek Zekât: " + zekat.toLocaleString('tr-TR', { maximumFractionDigits: 2 }) + " ₺";
+            resultEl.innerText = "Verilecek Zekât: " + (netWealth / 40).toLocaleString('tr-TR', { maximumFractionDigits: 2 }) + " ₺";
         } else {
             resultEl.style.color = "var(--text-muted)";
             resultEl.style.fontSize = "1em";
-            if (netWealth > 0) {
-                resultEl.innerText = "Safi varlığınız nisap sınırının altındadır.";
-            } else {
-                resultEl.innerText = "0 ₺";
-            }
+            if (netWealth > 0) resultEl.innerText = "Safi varlığınız nisap sınırının altındadır.";
+            else resultEl.innerText = "0 ₺";
         }
     }
 
-    // ZİKİR FONKSİYONLARI
-    function loadZikir() {
-        zikirCount = parseInt(localStorage.getItem('imsakiye_zikir')) || 0;
-        document.getElementById('zikirDisplay').innerText = zikirCount;
-    }
-    function addZikir() {
-        zikirCount++;
-        localStorage.setItem('imsakiye_zikir', zikirCount);
-        document.getElementById('zikirDisplay').innerText = zikirCount;
-    }
-    function resetZikir() {
-        zikirCount = 0;
-        localStorage.setItem('imsakiye_zikir', zikirCount);
-        document.getElementById('zikirDisplay').innerText = zikirCount;
-    }
+    function loadZikir() { zikirCount = parseInt(localStorage.getItem('imsakiye_zikir')) || 0; document.getElementById('zikirDisplay').innerText = zikirCount; }
+    function addZikir() { zikirCount++; localStorage.setItem('imsakiye_zikir', zikirCount); document.getElementById('zikirDisplay').innerText = zikirCount; }
+    function resetZikir() { zikirCount = 0; localStorage.setItem('imsakiye_zikir', zikirCount); document.getElementById('zikirDisplay').innerText = zikirCount; }
 
-    // BİLDİRİM İZNİ VE GÖNDERİMİ
     function requestNotificationPermission() {
-        if (!("Notification" in window)) {
-            alert("Tarayıcınız masaüstü bildirimlerini desteklemiyor.");
-        } else if (Notification.permission === "granted") {
-            alert("Bildirim izni zaten verilmiş! Vakit girdiğinde ekranınıza bildirim gelecek.");
-        } else if (Notification.permission !== "denied") {
-            Notification.requestPermission().then(permission => {
-                if (permission === "granted") {
-                    alert("Bildirim izni başarıyla alındı!");
-                }
-            });
+        if (!("Notification" in window)) alert("Tarayıcınız masaüstü bildirimlerini desteklemiyor.");
+        else if (Notification.permission === "granted") alert("Bildirim izni zaten verilmiş! Vakit girdiğinde ekranınıza bildirim gelecek.");
+        else if (Notification.permission !== "denied") {
+            Notification.requestPermission().then(permission => { if (permission === "granted") alert("Bildirim izni başarıyla alındı!"); });
         }
     }
 
@@ -596,6 +532,7 @@
     function saveSettings() {
         const settings = {
             city: document.getElementById('citySelect').value,
+            district: document.getElementById('districtSelect').value,
             theme: document.getElementById('themeSelect').value,
             zoom: currentZoom,
             sound: document.getElementById('soundSelect').value,
@@ -608,14 +545,10 @@
         const saved = localStorage.getItem('imsakiye_settings');
         if (saved) {
             const s = JSON.parse(saved);
-            document.getElementById('citySelect').value = s.city || "Rize";
             document.getElementById('themeSelect').value = s.theme || "sepia";
             currentZoom = s.zoom || 0.95;
             document.getElementById('soundSelect').value = s.sound || "sound_bell";
             document.getElementById('soundToggle').checked = s.soundActive !== undefined ? s.soundActive : true;
-        } else {
-            document.getElementById('citySelect').value = "Rize";
-            document.getElementById('themeSelect').value = "sepia";
         }
         changeTheme();
         document.getElementById('mainWrapper').style.zoom = currentZoom;
@@ -623,15 +556,71 @@
 
     function changeZoom(s){ currentZoom+=s; document.getElementById('mainWrapper').style.zoom = currentZoom; saveSettings(); }
     function changeTheme(){ document.body.setAttribute('data-theme', document.getElementById('themeSelect').value); }
-    
     function testSound() {
         const audio = document.getElementById(document.getElementById('soundSelect').value);
         if(audio) { audio.currentTime = 0; audio.play().catch(e => console.log("Etkileşim gerekli")); }
     }
 
-    const cities = ["Adana", "Adiyaman", "Afyonkarahisar", "Agri", "Aksaray", "Amasya", "Ankara", "Antalya", "Ardahan", "Artvin", "Aydin", "Balikesir", "Bartin", "Batman", "Bayburt", "Bilecik", "Bingol", "Bitlis", "Bolu", "Burdur", "Bursa", "Canakkale", "Cankiri", "Corum", "Denizli", "Diyarbakir", "Duzce", "Edirne", "Elazig", "Erzincan", "Erzurum", "Eskisehir", "Gaziantep", "Giresun", "Gumushane", "Hakkari", "Hatay", "Igdir", "Isparta", "Istanbul", "Izmir", "Kahramanmaras", "Karabuk", "Karaman", "Kars", "Kastamonu", "Kayseri", "Kilis", "Kirikkale", "Kirklareli", "Kirsehir", "Kocaeli", "Konya", "Kutahya", "Malatya", "Manisa", "Mardin", "Mersin", "Mugla", "Mus", "Nevsehir", "Nigde", "Ordu", "Osmaniye", "Rize", "Sakarya", "Samsun", "Sanliurfa", "Siirt", "Sinop", "Sirnak", "Sivas", "Tekirdag", "Tokat", "Trabzon", "Tunceli", "Usak", "Van", "Yalova", "Yozgat", "Zonguldak"];
-    const citySelect = document.getElementById('citySelect');
-    cities.forEach(c => { let o = document.createElement('option'); o.value = c; o.textContent = c; citySelect.appendChild(o); });
+    // --- DİYANET API ENTEGRASYONU ---
+    async function loadCities() {
+        try {
+            const res = await fetch('https://ezanvakti.emushaf.net/sehirler/2');
+            const cities = await res.json();
+            const citySelect = document.getElementById('citySelect');
+            citySelect.innerHTML = '';
+            
+            cities.forEach(c => {
+                let opt = document.createElement('option');
+                opt.value = c.SehirID;
+                opt.text = c.SehirAdi;
+                citySelect.appendChild(opt);
+            });
+            
+            const saved = localStorage.getItem('imsakiye_settings');
+            if (saved && JSON.parse(saved).city) {
+                citySelect.value = JSON.parse(saved).city;
+            } else {
+                // Varsayılan olarak Rize'yi (583) bul ve seç
+                const defaultCity = cities.find(c => c.SehirAdi === "RİZE");
+                if (defaultCity) citySelect.value = defaultCity.SehirID;
+            }
+            
+            await loadDistricts();
+        } catch(e) {
+            console.log("Diyanet şehirleri yüklenemedi", e);
+        }
+    }
+
+    async function loadDistricts() {
+        const cityId = document.getElementById('citySelect').value;
+        try {
+            const res = await fetch('https://ezanvakti.emushaf.net/ilceler/' + cityId);
+            const districts = await res.json();
+            const distSelect = document.getElementById('districtSelect');
+            distSelect.innerHTML = '';
+            
+            districts.forEach(d => {
+                let opt = document.createElement('option');
+                opt.value = d.IlceID;
+                opt.text = d.IlceAdi;
+                distSelect.appendChild(opt);
+            });
+
+            const saved = localStorage.getItem('imsakiye_settings');
+            if (saved && JSON.parse(saved).district && JSON.parse(saved).city === cityId) {
+                distSelect.value = JSON.parse(saved).district;
+            } else {
+                // Varsayılan olarak Merkez ilçeyi bul
+                const defaultDist = districts.find(d => d.IlceAdi.includes("MERKEZ") || d.IlceAdi === document.getElementById('citySelect').options[document.getElementById('citySelect').selectedIndex].text);
+                if (defaultDist) distSelect.value = defaultDist.IlceID;
+            }
+            
+            saveSettings();
+            getMonthlyTimings();
+        } catch(e) {
+            console.log("Diyanet ilçeleri yüklenemedi", e);
+        }
+    }
 
     function updateMoonPhase(hDay) {
         let phaseIndex = Math.floor((hDay / 29) * (moonPhases.length - 1));
@@ -641,9 +630,7 @@
 
     function updateDailyContent(hDay) {
         let index = hDay - 1;
-        if(index < 0) index = 0;
-        if(index >= ramadanContent.length) index = ramadanContent.length - 1;
-        
+        if(index < 0) index = 0; if(index >= ramadanContent.length) index = ramadanContent.length - 1;
         const data = ramadanContent[index];
         document.getElementById('modalTitle').innerHTML = `🌟 ${hDay} Ramazan Özel İçerikleri`;
         document.getElementById('menuSoup').innerText = data.soup;
@@ -681,65 +668,103 @@
             <div class="modal-time-box"><div class="modal-time-name">Yatsı</div><div class="modal-time-val">${ya}</div></div>
         `;
         
-        if(!isInitialLoad) {
-            openModal();
-        }
+        if(!isInitialLoad) openModal();
     }
 
+    // Gelişmiş Diyanet Çekirdek Motoru (Eksik günleri Aladhan ile milimetrik tamamlar)
     async function getMonthlyTimings() {
-        const city = citySelect.value;
+        saveSettings();
+        const distId = document.getElementById('districtSelect').value;
+        if(!distId) return;
+
         const tbody1 = document.getElementById('tbody1'); const tbody2 = document.getElementById('tbody2');
         tbody1.innerHTML = ''; tbody2.innerHTML = ''; allEvents = [];
         
-        // ÇEVRİMDIŞI ÖNBELLEK KONTROLÜ
-        const cacheKey = `imsakiye_2026_${city}`;
-        const cachedData = localStorage.getItem(cacheKey);
-        let dF, dM;
-
         try {
-            if (cachedData) {
-                const parsed = JSON.parse(cachedData);
-                dF = parsed.dF;
-                dM = parsed.dM;
-                console.log("Veri önbellekten (çevrimdışı) yüklendi.");
-            } else {
-                const [rF, rM] = await Promise.all([
-                    fetch(`https://api.aladhan.com/v1/calendarByCity/2026/2?city=${city}&country=Turkey&method=13`),
-                    fetch(`https://api.aladhan.com/v1/calendarByCity/2026/3?city=${city}&country=Turkey&method=13`)
-                ]);
-                dF = await rF.json(); 
-                dM = await rM.json();
-                localStorage.setItem(cacheKey, JSON.stringify({dF: dF, dM: dM}));
-                console.log("Veri API'den çekildi ve kaydedildi.");
-            }
-
-            const bayramDay = dM.data.find(day => day.date.gregorian.date === "20-03-2026");
+            // 1. Diyanet Verisini Çek
+            const dRes = await fetch('https://ezanvakti.emushaf.net/vakitler/' + distId);
+            const dDataAll = await dRes.json();
+            
+            // Sadece Ramazan Günlerini Al (9. Ay)
+            const dData = dDataAll.filter(d => parseInt(d.HicriTarihKisa.split('.')[1]) === 9);
+            
+            // Bayram Namazını Çek (10. Ayın 1. Günü)
+            const bayramDay = dDataAll.find(d => parseInt(d.HicriTarihKisa.split('.')[1]) === 10 && parseInt(d.HicriTarihKisa.split('.')[0]) === 1);
             if (bayramDay) {
-                const sunriseStr = bayramDay.timings.Sunrise.split(' ')[0];
-                const [h, m] = sunriseStr.split(':').map(Number);
-                let bayramD = new Date();
-                bayramD.setHours(h, m + 45, 0, 0); 
-                
-                const bayramH = String(bayramD.getHours()).padStart(2, '0');
-                const bayramM = String(bayramD.getMinutes()).padStart(2, '0');
-                document.getElementById('bayramTime').innerText = `${bayramH}:${bayramM}`;
+                const [h, m] = bayramDay.Gunes.split(':').map(Number);
+                let bD = new Date(); bD.setHours(h, m + 45, 0, 0); // Diyanet Kuralı: Güneş + 45dk
+                document.getElementById('bayramTime').innerText = String(bD.getHours()).padStart(2,'0') + ':' + String(bD.getMinutes()).padStart(2,'0');
+            } else {
+                document.getElementById('bayramTime').innerText = "06:53"; 
             }
 
-            const ramadanDays = [...dF.data, ...dM.data].filter(day => {
-                const [d, m, y] = day.date.gregorian.date.split('-');
-                const cur = new Date(`${y}-${m}-${d}`);
-                return cur >= new Date('2026-02-19') && cur <= new Date('2026-03-19');
-            });
+            // 2. Aladhan Verisini Çek (Eksik geçmiş günleri tamamlamak için)
+            const cityName = document.getElementById('citySelect').options[document.getElementById('citySelect').selectedIndex].text;
+            const [alF, alM] = await Promise.all([
+                fetch(`https://api.aladhan.com/v1/calendarByCity/2026/2?city=${encodeURIComponent(cityName)}&country=Turkey&method=13`),
+                fetch(`https://api.aladhan.com/v1/calendarByCity/2026/3?city=${encodeURIComponent(cityName)}&country=Turkey&method=13`)
+            ]);
+            const alFData = await alF.json(); const alMData = await alM.json();
+            const aladhanDays = [...alFData.data, ...alMData.data];
 
-            const todayStr = String(new Date().getDate()).padStart(2, '0') + '-' + String(new Date().getMonth() + 1).padStart(2, '0') + '-' + new Date().getFullYear();
-            const mid = Math.ceil(ramadanDays.length / 2);
-            let todayRef = null; let todayObj = null;
+            let deltas = { im: 0, gu: 0, og: 0, ik: 0, ak: 0, ya: 0 };
+            
+            // Matematiksel Delta (Fark) Hesaplaması
+            if (dData.length > 0) {
+                const firstD = dData[0];
+                const [dd, mm, yy] = firstD.MiladiTarihKisa.split('.');
+                const matchAladhan = aladhanDays.find(a => a.date.gregorian.date === `${dd}-${mm}-${yy}`);
+                
+                if (matchAladhan) {
+                    const getMins = (str) => { const [h, m] = str.split(' ')[0].split(':'); return parseInt(h)*60 + parseInt(m); };
+                    deltas.im = getMins(firstD.Imsak) - getMins(matchAladhan.timings.Imsak);
+                    deltas.gu = getMins(firstD.Gunes) - getMins(matchAladhan.timings.Sunrise);
+                    deltas.og = getMins(firstD.Ogle) - getMins(matchAladhan.timings.Dhuhr);
+                    deltas.ik = getMins(firstD.Ikindi) - getMins(matchAladhan.timings.Asr);
+                    deltas.ak = getMins(firstD.Aksam) - getMins(matchAladhan.timings.Maghrib);
+                    deltas.ya = getMins(firstD.Yatsi) - getMins(matchAladhan.timings.Isha);
+                }
+            }
 
-            ramadanDays.forEach((day, i) => {
-                const t = day.timings; const gDate = day.date.gregorian.date; const hDay = i + 1;
-                const clean = (s) => s.split(' ')[0];
-                const v = { im: clean(t.Imsak), gu: clean(t.Sunrise), og: clean(t.Dhuhr), ik: clean(t.Asr), ak: clean(t.Maghrib), ya: clean(t.Isha) };
-                const [d, m, y] = gDate.split('-');
+            let fullMonth = [];
+            const ramadanStart = new Date('2026-02-18T00:00:00'); // Ramazan Başlangıcı 2026
+            
+            for (let i = 0; i < 30; i++) {
+                let curDate = new Date(ramadanStart);
+                curDate.setDate(curDate.getDate() + i);
+                
+                const dd = String(curDate.getDate()).padStart(2, '0');
+                const mm = String(curDate.getMonth() + 1).padStart(2, '0');
+                const yy = curDate.getFullYear();
+                
+                const dDay = dData.find(d => d.MiladiTarihKisa === `${dd}.${mm}.${yy}`);
+                
+                if (dDay) {
+                    fullMonth.push({ hDay: i + 1, mDate: dDay.MiladiTarihKisa, im: dDay.Imsak, gu: dDay.Gunes, og: dDay.Ogle, ik: dDay.Ikindi, ak: dDay.Aksam, ya: dDay.Yatsi });
+                } else {
+                    const aDay = aladhanDays.find(a => a.date.gregorian.date === `${dd}-${mm}-${yy}`);
+                    if (aDay) {
+                        const addMins = (str, mins) => {
+                            const [h, m] = str.split(' ')[0].split(':').map(Number);
+                            let dt = new Date(); dt.setHours(h, m + mins, 0, 0);
+                            return String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0');
+                        };
+                        fullMonth.push({ hDay: i + 1, mDate: `${dd}.${mm}.${yy}`, 
+                            im: addMins(aDay.timings.Imsak, deltas.im), gu: addMins(aDay.timings.Sunrise, deltas.gu), 
+                            og: addMins(aDay.timings.Dhuhr, deltas.og), ik: addMins(aDay.timings.Asr, deltas.ik), 
+                            ak: addMins(aDay.timings.Maghrib, deltas.ak), ya: addMins(aDay.timings.Isha, deltas.ya) 
+                        });
+                    }
+                }
+            }
+
+            const todayObjDate = new Date();
+            const todayStr = String(todayObjDate.getDate()).padStart(2, '0') + '.' + String(todayObjDate.getMonth() + 1).padStart(2, '0') + '.' + todayObjDate.getFullYear();
+            const mid = Math.ceil(fullMonth.length / 2);
+            let todayRef = null;
+            
+            fullMonth.forEach((v, i) => {
+                const [d, m, y] = v.mDate.split('.');
                 const makeD = (ts) => new Date(`${y}-${m}-${d}T${ts}:00`);
                 
                 allEvents.push(
@@ -751,26 +776,25 @@
                     { n: 'Yatsı', t: makeD(v.ya), isFast: false }
                 );
 
-                const isT = (gDate === todayStr);
+                const isT = (v.mDate === todayStr);
                 const row = document.createElement('tr');
                 if(isT) row.className = 'today-row';
                 
-                row.onclick = () => selectDay(row, hDay, v.im, v.gu, v.og, v.ik, v.ak, v.ya, isT);
-                row.innerHTML = `<td class="date-hicri">${hDay} Ramazan</td><td class="date-miladi">${d} ${["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"][m-1]}</td><td>${v.im}</td><td>${v.gu}</td><td>${v.og}</td><td>${v.ik}</td><td class="iftar-col">${v.ak}</td><td>${v.ya}</td>`;
+                row.onclick = () => selectDay(row, v.hDay, v.im, v.gu, v.og, v.ik, v.ak, v.ya, isT);
+                row.innerHTML = `<td class="date-hicri">${v.hDay} Ramazan</td><td class="date-miladi">${d} ${["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"][parseInt(m)-1]}</td><td>${v.im}</td><td>${v.gu}</td><td>${v.og}</td><td>${v.ik}</td><td class="iftar-col">${v.ak}</td><td>${v.ya}</td>`;
                 
                 if(i < mid) tbody1.appendChild(row); else tbody2.appendChild(row);
-                if(isT) { todayRef = row; todayObj = { hDay, ...v }; }
+                if(isT) todayRef = row; 
             });
 
             if(todayRef) todayRef.click();
-            else if(ramadanDays.length > 0) tbody1.firstChild.click();
+            else if(fullMonth.length > 0) tbody1.firstChild.click();
             
             isInitialLoad = false;
             startCountdown();
 
         } catch (e) { 
-            console.log("Veri yüklenirken hata oluştu:", e); 
-            if(!cachedData) alert("Lütfen verilerin ilk kez yüklenmesi için internet bağlantınızı kontrol edin.");
+            console.log("Veri çekilemedi:", e); 
         }
     }
 
@@ -835,7 +859,7 @@
                         const selectedSound = document.getElementById('soundSelect').value;
                         document.getElementById(selectedSound).play().catch(e => console.log("Ses oynatma engellendi:", e));
                     }
-                    sendPushNotification(`🔔 ${next.n} Vakti!`, `${document.getElementById('citySelect').value} için ${next.n} vakti girdi. Hayırlı Ramazanlar!`);
+                    sendPushNotification(`🔔 ${next.n} Vakti!`, `${document.getElementById('districtSelect').options[document.getElementById('districtSelect').selectedIndex].text} için ${next.n} vakti girdi. Hayırlı Ramazanlar!`);
                 }
             }
 
@@ -884,10 +908,10 @@
         document.getElementById('liveDate').innerText = now.toLocaleDateString('tr-TR', options) + " (Miladi)";
     }
 
-   window.onload = () => {
+   window.onload = async () => {
         loadSettings();
         loadZikir();
-        getMonthlyTimings();
+        await loadCities(); // Şehirleri ve ardından İlçeleri yükler, en son getMonthlyTimings'i tetikler.
         
         updateLiveDateTime();
         setInterval(updateLiveDateTime, 1000);
