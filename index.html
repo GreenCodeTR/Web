@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#38bdf8">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> 1447 / 2026 Ramazan İmsakiyesi</title>
@@ -287,6 +289,7 @@
                     </div>
                 </div>
                 <button class="btn-fullscreen-settings" onclick="toggleFullScreen()" id="fsBtn">🔲 Tam Ekran</button>
+                <button id="installAppBtn" class="btn-fullscreen-settings" style="display: none; background: var(--iftar-color); color: white; border-color: var(--iftar-color);">📱       Uygulamayı Yükle</button>
                 <label class="sound-toggle-row"><input type="checkbox" id="soundToggle" onchange="saveSettings();" checked> Bildirim Sesi</label>
             </div>
         </div>
@@ -677,7 +680,7 @@
         document.getElementById('liveDate').innerText = now.toLocaleDateString('tr-TR', options) + " (Miladi)";
     }
 
-    window.onload = () => {
+   window.onload = () => {
         loadSettings();
         loadZikir();
         getMonthlyTimings();
@@ -685,6 +688,39 @@
         updateLiveDateTime();
         setInterval(updateLiveDateTime, 1000);
     };
+
+    // PWA Service Worker Kodunu buraya, mevcut script'in içine aldık.
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('PWA Service Worker başarıyla kaydedildi.', reg))
+                .catch(err => console.log('PWA Service Worker hatası:', err));
+        });
+    }
+// UYGULAMAYI YÜKLE (PWA) BUTONU MANTIĞI
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Tarayıcının varsayılan uyarı çubuğunu engelle
+        e.preventDefault();
+        // Olayı daha sonra butona basıldığında kullanmak için kaydet
+        deferredPrompt = e;
+        // Gizli olan 'Uygulamayı Yükle' butonumuzu görünür yap
+        document.getElementById('installAppBtn').style.display = 'block';
+    });
+
+    document.getElementById('installAppBtn').addEventListener('click', async () => {
+        if (deferredPrompt) {
+            // Yükleme penceresini göster
+            deferredPrompt.prompt();
+            // Kullanıcının cevabını bekle
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                console.log('Kullanıcı uygulamayı yükledi.');
+                document.getElementById('installAppBtn').style.display = 'none';
+            }
+            deferredPrompt = null;
+        }
+    });
 </script>
 </body>
 </html>
