@@ -296,10 +296,15 @@
                         <button class="btn-action" onclick="changeZoom(0.02)">+</button>
                     </div>
                 </div>
-                <div style="grid-column: span 2;">
+                <div>
+                    <label>🔊 Uyarı Durumu</label>
+                    <label class="sound-toggle-row" style="margin-top: 0;"><input type="checkbox" id="soundToggle" onchange="saveSettings();" checked> Bildirim Sesi</label>
+                </div>
+                
+                <div style="grid-column: span 1;">
                     <label>🔔 Ses Seçimi</label>
                     <div class="sound-controls">
-                        <select id="soundSelect" onchange="saveSettings();" style="flex:4;">
+                        <select id="soundSelect" onchange="saveSettings();" style="flex:3;">
                             <option value="sound_bell">Klasik Zil</option><option value="sound_soft">Yumuşak Çan</option><option value="sound_modern">Modern Uyarı</option>
                             <option value="sound_ding">Ding-Dong</option><option value="sound_beep">Dijital Beep</option><option value="sound_chime">Rüzgar Çanı</option>
                             <option value="sound_crystal">Kristal Tınlama</option><option value="sound_piano">Soft Piyano</option><option value="sound_echo">Eko Uyarı</option>
@@ -308,10 +313,10 @@
                         <button class="btn-action" onclick="testSound()" title="Sesi Dinle" style="flex:1;">▶️</button>
                     </div>
                 </div>
+
                 <button class="btn-fullscreen-settings" onclick="toggleFullScreen()" id="fsBtn">🔲 Tam Ekran</button>
                 <button class="btn-fullscreen-settings" onclick="requestNotificationPermission()" style="color: var(--accent); border-color: var(--accent);">📱 Bildirim İzni</button>
                 <button id="installAppBtn" class="btn-fullscreen-settings" style="display: none; background: var(--iftar-color); color: white; border-color: var(--iftar-color); grid-column: span 2;">📱 Uygulamayı Yükle</button>
-                <label class="sound-toggle-row"><input type="checkbox" id="soundToggle" onchange="saveSettings();" checked> Bildirim Sesi</label>
             </div>
         </div>
     </div>
@@ -692,7 +697,7 @@
             const bayramDay = dDataAll.find(d => parseInt(d.HicriTarihKisa.split('.')[1]) === 10 && parseInt(d.HicriTarihKisa.split('.')[0]) === 1);
             if (bayramDay) {
                 const [h, m] = bayramDay.Gunes.split(':').map(Number);
-                let bD = new Date(); bD.setHours(h, m + 45, 0, 0); // Diyanet Kuralı: Güneş + 45dk
+                let bD = new Date(); bD.setHours(h, m + 38, 0, 0); // Diyanet Kuralı: Güneş + 38dk
                 document.getElementById('bayramTime').innerText = String(bD.getHours()).padStart(2,'0') + ':' + String(bD.getMinutes()).padStart(2,'0');
             } else {
                 document.getElementById('bayramTime').innerText = "06:53"; 
@@ -727,9 +732,9 @@
             }
 
             let fullMonth = [];
-            const ramadanStart = new Date('2026-02-18T00:00:00'); // Ramazan Başlangıcı 2026
+            const ramadanStart = new Date('2026-02-19T00:00:00'); // Ramazan Başlangıcı 2026
             
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < 29; i++) {
                 let curDate = new Date(ramadanStart);
                 curDate.setDate(curDate.getDate() + i);
                 
