@@ -202,6 +202,24 @@
             /* Telefondaki yazı boyutlarını biraz daha okunaklı yapalım */
             table { font-size: 0.85em; } 
         }
+
+        /* TELEFONLAR YAN ÇEVRİLDİĞİNDE (KISA EKRANLAR) İÇİN DÜZELTME */
+        @media (max-height: 650px) {
+            body { 
+                height: auto !important; 
+                min-height: 100vh; 
+                overflow-y: auto !important; 
+                display: block; 
+            }
+            .main-wrapper { 
+                height: auto !important; 
+                display: flex !important; 
+                flex-direction: column; 
+            }
+            .tables-wrapper, .right-panel, .table-card { 
+                height: auto !important; 
+            }
+        }
     </style>
 </head>
 <body data-theme="sepia">
