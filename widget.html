@@ -6,14 +6,7 @@
     <title>Namaz Vakitleri Widget</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800;900&display=swap');
-        
-        body {
-            font-family: 'Outfit', sans-serif; margin: 0; padding: 0;
-            display: flex; justify-content: center; align-items: center;
-            height: 100vh; overflow: hidden; background: transparent;
-        }
-
-        /* TEMALAR */
+        body { font-family: 'Outfit', sans-serif; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; background: transparent; }
         :root { --bg: transparent; --text: #333; --border: #ddd; --box-bg: rgba(0,0,0,0.03); --accent: #38bdf8; --iftar-color: #10b981; }
         .theme-dark { --bg: #1e293b; --text: #f8fafc; --border: #334155; --box-bg: rgba(0,0,0,0.2); --accent: #38bdf8; --iftar-color: #10b981;}
         .theme-light { --bg: #ffffff; --text: #0f172a; --border: #e2e8f0; --box-bg: #f8fafc; --accent: #2563eb; --iftar-color: #10b981;}
@@ -26,81 +19,32 @@
         .theme-terracotta { --bg: #2e1008; --text: #ffedd5; --border: #431407; --box-bg: rgba(0,0,0,0.2); --accent: #fdba74; --iftar-color: #fb923c;}
         .theme-midnight { --bg: #171717; --text: #fafafa; --border: #262626; --box-bg: rgba(255,255,255,0.05); --accent: #818cf8; --iftar-color: #2dd4bf;}
         .theme-transparent { --bg: transparent; --text: inherit; --border: transparent; --box-bg: rgba(128,128,128,0.1); --accent: #10b981; --iftar-color: #10b981;}
-
-        .widget-wrapper {
-            width: 100%; height: 100%; box-sizing: border-box;
-            display: flex; flex-direction: column; justify-content: space-between; align-items: center;
-            padding: 15px; border-radius: 12px;
-            background-color: var(--bg); color: var(--text); border: 1px solid var(--border);
-        }
-
-        /* ÜST KISIM: DEV SAYAÇ */
+        .widget-wrapper { width: 100%; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 15px; border-radius: 12px; background-color: var(--bg); color: var(--text); border: 1px solid var(--border); }
         .countdown-area { text-align: center; margin-bottom: 10px; width: 100%; }
         .countdown-title { font-size: 0.8em; font-weight: 700; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;}
         .countdown-timer { font-size: 3em; font-weight: 900; line-height: 1; color: var(--accent); font-variant-numeric: tabular-nums; }
-        
         .color-green { color: var(--iftar-color) !important; }
-
-        /* ALT KISIM: VAKİT KUTULARI (Grid) */
-        .times-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; flex-grow: 1;
-        }
-
-        /* Tek Sütunlu Görünüm (Dar ekranlar/seçimler için) */
-        @media (max-width: 350px) {
-            .times-grid { grid-template-columns: repeat(2, 1fr); }
-            .countdown-timer { font-size: 2.2em; }
-        }
-        @media (max-width: 200px) {
-             .times-grid { display: none; } /* Çok darsa kutuları gizle sadece sayaç kalsın */
-        }
-
-        .time-box {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background-color: var(--box-bg); border: 1px solid var(--border);
-            border-radius: 8px; padding: 8px 4px; transition: 0.3s;
-        }
-        
+        .times-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; flex-grow: 1; }
+        .time-box { display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: var(--box-bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 4px; transition: 0.3s; }
         .time-name { font-size: 0.65em; font-weight: 700; opacity: 0.6; text-transform: uppercase; margin-bottom: 2px;}
         .time-val { font-size: 1.2em; font-weight: 800; font-variant-numeric: tabular-nums;}
-
-        /* GEÇMİŞ VE SIRADAKİ VAKİT STİLLERİ */
         .past-time { opacity: 0.35; filter: grayscale(1); }
-        
-        .active-time {
-            background: linear-gradient(135deg, var(--accent), var(--iftar-color));
-            border: none !important;
-            color: #fff !important;
-            transform: scale(1.03);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
+        .active-time { background: linear-gradient(135deg, var(--accent), var(--iftar-color)); border: none !important; color: #fff !important; transform: scale(1.03); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
         .active-time .time-name { opacity: 0.9; color: #fff; }
-        
-        /* Tema özel active durumları (Eğer tema renkleri uyumsuzsa) */
         .theme-light .active-time { background: var(--accent); }
         .theme-sepia .active-time { background: linear-gradient(135deg, #b45309, #047857); }
-
         .footer-link { font-size: 0.7em; opacity: 0.4; color: inherit; text-decoration: none; margin-top: 10px; font-weight: 600; }
         .footer-link:hover { opacity: 1; text-decoration: underline; }
     </style>
 </head>
 <body>
-
     <audio id="vakitSesi" preload="auto"></audio>
-
     <div class="widget-wrapper theme-dark" id="widgetBox">
-        
-        <!-- DEV SAYAÇ ALANI -->
         <div class="countdown-area">
             <div class="countdown-title" id="vakitAdi">Yükleniyor...</div>
             <div class="countdown-timer" id="kalanSure">00:00:00</div>
         </div>
-
-        <!-- VAKİT KUTULARI ALANI -->
-        <div class="times-grid" id="timesGrid">
-            <!-- JavaScript ile doldurulacak -->
-        </div>
-
+        <div class="times-grid" id="timesGrid"></div>
         <a href="https://webimsakiye.com.tr" target="_blank" class="footer-link">webimsakiye.com.tr</a>
     </div>
 
@@ -109,141 +53,91 @@
         const ilceId = params.get('ilce') || '583'; 
         const tema = params.get('tema') || 'dark';
         const ses = params.get('ses') || 'none';
-
-        const sesDosyalari = {
-            "sound_bell": "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3",
-            "sound_soft": "https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3",
-            "sound_modern": "https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3",
-            "sound_ding": "https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3",
-            "sound_beep": "https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3",
-            "sound_chime": "https://assets.mixkit.co/active_storage/sfx/1052/1052-preview.mp3",
-            "sound_crystal": "https://assets.mixkit.co/active_storage/sfx/1115/1115-preview.mp3",
-            "sound_piano": "https://assets.mixkit.co/active_storage/sfx/2005/2005-preview.mp3",
-            "sound_echo": "https://assets.mixkit.co/active_storage/sfx/2607/2607-preview.mp3",
-            "sound_retro": "https://assets.mixkit.co/active_storage/sfx/1931/1931-preview.mp3"
-        };
-
         document.getElementById('widgetBox').className = `widget-wrapper theme-${tema}`;
         
         const sesElementi = document.getElementById('vakitSesi');
-        if (ses !== 'none' && sesDosyalari[ses]) {
-            sesElementi.src = sesDosyalari[ses];
-        }
+        const sesDosyalari = { "sound_bell": "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3", "sound_soft": "https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" };
+        if (ses !== 'none' && sesDosyalari[ses]) sesElementi.src = sesDosyalari[ses];
 
         let vakitler = [];
-        let yarinImsakZamani;
+        let yarinImsakDk = 0;
+        let sesCalindi = false;
+
+        function toMinutes(timeStr) {
+            const [h, m] = timeStr.split(':').map(Number);
+            return h * 60 + m;
+        }
 
         async function vakitleriGetir() {
             try {
                 const res = await fetch('https://ezanvakti.emushaf.net/vakitler/' + ilceId);
                 const data = await res.json();
-                
-                const bugun = data[0]; 
+                const bugun = data[0];
                 const yarin = data[1];
 
-                const d = bugun.MiladiTarihKisa.split('.');
-                const prefix = `${d[2]}-${d[1]}-${d[0]}T`;
-
                 vakitler = [
-                    { id: 'imsak', ad: 'İmsak', zaman: new Date(prefix + bugun.Imsak + ':00'), str: bugun.Imsak },
-                    { id: 'gunes', ad: 'Güneş', zaman: new Date(prefix + bugun.Gunes + ':00'), str: bugun.Gunes },
-                    { id: 'ogle', ad: 'Öğle', zaman: new Date(prefix + bugun.Ogle + ':00'), str: bugun.Ogle },
-                    { id: 'ikindi', ad: 'İkindi', zaman: new Date(prefix + bugun.Ikindi + ':00'), str: bugun.Ikindi },
-                    { id: 'aksam', ad: 'Akşam', zaman: new Date(prefix + bugun.Aksam + ':00'), str: bugun.Aksam },
-                    { id: 'yatsi', ad: 'Yatsı', zaman: new Date(prefix + bugun.Yatsi + ':00'), str: bugun.Yatsi }
+                    { id: 'imsak', ad: 'İmsak', dk: toMinutes(bugun.Imsak), str: bugun.Imsak },
+                    { id: 'gunes', ad: 'Güneş', dk: toMinutes(bugun.Gunes), str: bugun.Gunes },
+                    { id: 'ogle', ad: 'Öğle', dk: toMinutes(bugun.Ogle), str: bugun.Ogle },
+                    { id: 'ikindi', ad: 'İkindi', dk: toMinutes(bugun.Ikindi), str: bugun.Ikindi },
+                    { id: 'aksam', ad: 'Akşam', dk: toMinutes(bugun.Aksam), str: bugun.Aksam },
+                    { id: 'yatsi', ad: 'Yatsı', dk: toMinutes(bugun.Yatsi), str: bugun.Yatsi }
                 ];
 
-                // 6 Kutuyu Ekrana Çiz
+                yarinImsakDk = toMinutes(yarin.Imsak) + 1440; // Yarının imsağı bugünden 1440 dakika sonra
+
                 const grid = document.getElementById('timesGrid');
                 grid.innerHTML = '';
                 vakitler.forEach(v => {
-                    grid.innerHTML += `
-                        <div class="time-box" id="box-${v.id}" data-time="${v.zaman}">
-                            <div class="time-name">${v.ad}</div>
-                            <div class="time-val">${v.str}</div>
-                        </div>
-                    `;
+                    grid.innerHTML += `<div class="time-box" id="box-${v.id}"><div class="time-name">${v.ad}</div><div class="time-val">${v.str}</div></div>`;
                 });
 
-                // Yarının imsağı (Gece 00:00'dan sonra sayması için)
-                const d2 = yarin.MiladiTarihKisa.split('.');
-                yarinImsakZamani = new Date(`${d2[2]}-${d2[1]}-${d2[0]}T${yarin.Imsak}:00`);
-
-                sayaciBaslat();
-            } catch (error) {
-                document.getElementById('vakitAdi').innerText = "Bağlantı Hatası";
-            }
+                startTimer();
+            } catch (e) { document.getElementById('vakitAdi').innerText = "Hata!"; }
         }
 
-        let sesCalindi = false;
-
-        function sayaciBaslat() {
+        function startTimer() {
             setInterval(() => {
-                const simdi = new Date();
-                
-                // Kutu stillerini sıfırla
-                document.querySelectorAll('.time-box').forEach(b => {
-                    b.classList.remove('active-time', 'past-time');
-                    // Geçmiş vakitleri soluk yap
-                    let bTime = new Date(b.getAttribute('data-time'));
-                    if(simdi >= bTime) {
-                        b.classList.add('past-time');
-                    }
-                });
+                const now = new Date();
+                const simdiDk = now.getHours() * 60 + now.getMinutes();
+                const simdiSn = now.getSeconds();
 
-                // Sıradaki Vakti Bul
-                let siradakiVakit = vakitler.find(v => v.zaman > simdi);
-                let hedefZaman;
+                let siradaki = vakitler.find(v => v.dk > simdiDk);
+                let hedefDk, ad;
 
-                if (siradakiVakit) {
-                    // Gün içindeysek sıradaki kutuyu canlandır (past-time'ı sil ve active-time ekle)
-                    const activeBox = document.getElementById(`box-${siradakiVakit.id}`);
-                    activeBox.classList.remove('past-time');
-                    activeBox.classList.add('active-time');
-                    hedefZaman = siradakiVakit.zaman;
-                    document.getElementById('vakitAdi').innerText = `${siradakiVakit.ad} Vaktine`;
+                document.querySelectorAll('.time-box').forEach(b => b.classList.remove('active-time', 'past-time'));
+
+                if (siradaki) {
+                    hedefDk = siradaki.dk;
+                    ad = siradaki.ad;
+                    document.getElementById(`box-${siradaki.id}`).classList.add('active-time');
+                    vakitler.forEach(v => { if (simdiDk >= v.dk) document.getElementById(`box-${v.id}`).classList.add('past-time'); });
                 } else {
-                    // Yatsı geçmişse yarının imsak kutusunu canlandır
-                    const imsakBox = document.getElementById('box-imsak');
-                    imsakBox.classList.remove('past-time');
-                    imsakBox.classList.add('active-time');
-                    hedefZaman = yarinImsakZamani;
-                    document.getElementById('vakitAdi').innerText = `İmsak Vaktine`;
+                    hedefDk = yarinImsakDk;
+                    ad = "İmsak";
+                    document.getElementById('box-imsak').classList.add('active-time');
+                    vakitler.forEach(v => document.getElementById(`box-${v.id}`).classList.add('past-time'));
+                    document.getElementById('box-imsak').classList.remove('past-time');
                 }
 
-                // Geri Sayım Hesaplama
-                if (hedefZaman) {
-                    const fark = hedefZaman - simdi;
-                    const h = String(Math.floor(fark / 3600000)).padStart(2, '0');
-                    const m = String(Math.floor((fark % 3600000) / 60000)).padStart(2, '0');
-                    const s = String(Math.floor((fark % 60000) / 1000)).padStart(2, '0');
+                document.getElementById('vakitAdi').innerText = ad + " Vaktine";
 
-                    const sureEl = document.getElementById('kalanSure');
-                    sureEl.innerText = `${h}:${m}:${s}`;
+                // Saniye bazlı net hesaplama
+                let kalanSaniye = (hedefDk * 60) - (simdiDk * 60 + simdiSn);
+                if (kalanSaniye < 0) kalanSaniye = 0;
 
-                    // Renk ayarlaması (Akşam ve İmsak için yeşilimsi renk)
-                    if(siradakiVakit && (siradakiVakit.ad === 'Akşam' || siradakiVakit.ad === 'İmsak') || !siradakiVakit) {
-                        sureEl.className = 'countdown-timer color-green';
-                    } else {
-                        sureEl.className = 'countdown-timer';
-                    }
+                const h = String(Math.floor(kalanSaniye / 3600)).padStart(2, '0');
+                const m = String(Math.floor((kalanSaniye % 3600) / 60)).padStart(2, '0');
+                const s = String(kalanSaniye % 60).padStart(2, '0');
 
-                    // Ses çalma kontrolü
-                    if (h === '00' && m === '00' && s === '00' && !sesCalindi) {
-                        if (ses !== 'none') {
-                            sesElementi.play().catch(e => console.log("Otomatik ses engellendi:", e));
-                        }
-                        sesCalindi = true;
-                    } else if (s !== '00') {
-                        sesCalindi = false;
-                    }
+                document.getElementById('kalanSure').innerText = `${h}:${m}:${s}`;
+                document.getElementById('kalanSure').className = (ad === 'Akşam' || ad === 'İmsak') ? 'countdown-timer color-green' : 'countdown-timer';
+
+                if (h === "00" && m === "00" && s === "00" && !sesCalindi) {
+                    if (ses !== 'none') sesElementi.play().catch(() => {});
+                    sesCalindi = true;
+                    setTimeout(() => { sesCalindi = false; location.reload(); }, 2000);
                 }
-
-                // Gece 00:00:00 olduğunda sayfayı gizlice yenile
-                if (simdi.getHours() === 0 && simdi.getMinutes() === 0 && simdi.getSeconds() === 0) {
-                    setTimeout(() => location.reload(), 2000);
-                }
-
             }, 1000);
         }
 
