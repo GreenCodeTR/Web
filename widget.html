@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sıradaki Vakit</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
+        
+        body {
+            font-family: 'Outfit', sans-serif; margin: 0; padding: 0;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; overflow: hidden; background: transparent;
+        }
+
+        .widget-box {
+            width: 100%; height: 100%; box-sizing: border-box;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 15px; text-align: center; text-decoration: none;
+            transition: 0.3s; border-radius: 12px;
+        }
+
+        /* Temalar */
+        .theme-dark { background-color: #1e293b; color: #f8fafc; border: 1px solid #334155; }
+        .theme-light { background-color: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; }
+        .theme-sepia { background-color: #fffbf0; color: #4a3c31; border: 1px solid #d6caba; }
+        .theme-lavender { background-color: #f3f0ff; color: #312e81; border: 1px solid #e0e7ff; }
+        .theme-oled { background-color: #000000; color: #e0e0e0; border: 1px solid #333333; }
+        .theme-dark-forest { background-color: #0b2f1f; color: #e2f1e8; border: 1px solid #1a4d33; }
+        
+        /* Yeni Temalar */
+        .theme-sunrise { background-color: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; }
+        .theme-ocean { background-color: #0c4a6e; color: #e0f2fe; border: 1px solid #075985; }
+        .theme-terracotta { background-color: #2e1008; color: #ffedd5; border: 1px solid #431407; }
+        .theme-midnight { background-color: #171717; color: #fafafa; border: 1px solid #262626; }
+        
+        .theme-transparent { background-color: transparent; color: inherit; border: none; }
+
+        .title { font-size: 0.85em; opacity: 0.7; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 5px; }
+        .time { font-size: 2.5em; font-weight: 900; line-height: 1; margin-bottom: 5px; font-variant-numeric: tabular-nums; }
+        
+        /* İftar (Akşam/İmsak) Renk Vurguları */
+        .color-green { color: #10b981; }
+        .theme-sepia .color-green { color: #047857; }
+        .theme-dark-forest .color-green { color: #fcd34d; }
+        .theme-sunrise .color-green { color: #b45309; }
+        .theme-ocean .color-green { color: #38bdf8; }
+        .theme-terracotta .color-green { color: #fb923c; }
+        .theme-midnight .color-green { color: #2dd4bf; }
+
+        /* Normal Vakit Renk Vurguları */
+        .color-blue { color: #38bdf8; }
+        .theme-light .color-blue { color: #2563eb; }
+        .theme-sepia .color-blue { color: #b45309; }
+        .theme-lavender .color-blue { color: #8b5cf6; }
+        .theme-oled .color-blue { color: #fbbf24; }
+        .theme-dark-forest .color-blue { color: #fcd34d; }
+        .theme-sunrise .color-blue { color: #ea580c; }
+        .theme-ocean .color-blue { color: #7dd3fc; }
+        .theme-terracotta .color-blue { color: #fdba74; }
+        .theme-midnight .color-blue { color: #818cf8; }
+        
+        .footer-link { font-size: 0.7em; opacity: 0.4; color: inherit; text-decoration: none; margin-top: auto; font-weight: 600; }
+        .footer-link:hover { opacity: 1; text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <audio id="vakitSesi" preload="auto"></audio>
+
+    <a href="https://webimsakiye.com.tr" target="_blank" class="widget-box theme-dark" id="widgetBox">
+        <div class="title" id="vakitAdi">Yükleniyor...</div>
+        <div class="time color-blue" id="kalanSure">--:--:--</div>
+        <div class="footer-link">webimsakiye.com.tr</div>
+    </a>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const ilceId = params.get('ilce') || '583'; 
+        const tema = params.get('tema') || 'dark';
+        const ses = params.get('ses') || 'none';
+
+        const sesDosyalari = {
+            "sound_bell": "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3",
+            "sound_soft": "https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3",
+            "sound_modern": "https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3",
+            "sound_ding": "https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3",
+            "sound_beep": "https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3",
+            "sound_chime": "https://assets.mixkit.co/active_storage/sfx/1052/1052-preview.mp3",
+            "sound_crystal": "https://assets.mixkit.co/active_storage/sfx/1115/1115-preview.mp3",
+            "sound_piano": "https://assets.mixkit.co/active_storage/sfx/2005/2005-preview.mp3",
+            "sound_echo": "https://assets.mixkit.co/active_storage/sfx/2607/2607-preview.mp3",
+            "sound_retro": "https://assets.mixkit.co/active_storage/sfx/1931/1931-preview.mp3"
+        };
+
+        const widgetBox = document.getElementById('widgetBox');
+        widgetBox.className = `widget-box theme-${tema}`;
+        
+        const sesElementi = document.getElementById('vakitSesi');
+        if (ses !== 'none' && sesDosyalari[ses]) {
+            sesElementi.src = sesDosyalari[ses];
+        }
+
+        let vakitler = [];
+
+        async function vakitleriGetir() {
+            try {
+                const res = await fetch('https://ezanvakti.emushaf.net/vakitler/' + ilceId);
+                const data = await res.json();
+                const bugun = data[0]; 
+                
+                const d = bugun.MiladiTarihKisa.split('.');
+                const prefix = `${d[2]}-${d[1]}-${d[0]}T`;
+                
+                vakitler = [
+                    { ad: 'İmsak', zaman: new Date(prefix + bugun.Imsak + ':00') },
+                    { ad: 'Güneş', zaman: new Date(prefix + bugun.Gunes + ':00') },
+                    { ad: 'Öğle',  zaman: new Date(prefix + bugun.Ogle + ':00') },
+                    { ad: 'İkindi',zaman: new Date(prefix + bugun.Ikindi + ':00') },
+                    { ad: 'Akşam', zaman: new Date(prefix + bugun.Aksam + ':00') },
+                    { ad: 'Yatsı', zaman: new Date(prefix + bugun.Yatsi + ':00') }
+                ];
+                sayaciBaslat();
+            } catch (error) {
+                document.getElementById('vakitAdi').innerText = "Bağlantı Koptu";
+            }
+        }
+
+        let sesCalindi = false;
+
+        function sayaciBaslat() {
+            setInterval(() => {
+                const simdi = new Date();
+                const siradakiVakit = vakitler.find(v => v.zaman > simdi);
+
+                if (siradakiVakit) {
+                    const fark = siradakiVakit.zaman - simdi;
+                    const h = String(Math.floor(fark / 3600000)).padStart(2, '0');
+                    const m = String(Math.floor((fark % 3600000) / 60000)).padStart(2, '0');
+                    const s = String(Math.floor((fark % 60000) / 1000)).padStart(2, '0');
+
+                    document.getElementById('vakitAdi').innerText = `${siradakiVakit.ad} Vaktine`;
+                    const sureEl = document.getElementById('kalanSure');
+                    sureEl.innerText = `${h}:${m}:${s}`;
+
+                    if(siradakiVakit.ad === 'Akşam' || siradakiVakit.ad === 'İmsak') {
+                        sureEl.className = 'time color-green';
+                    } else {
+                        sureEl.className = 'time color-blue';
+                    }
+
+                    if (h === '00' && m === '00' && s === '00' && !sesCalindi) {
+                        if (ses !== 'none') {
+                            sesElementi.play().catch(e => console.log("Otomatik ses engellendi:", e));
+                        }
+                        sesCalindi = true;
+                    }
+
+                } else {
+                    document.getElementById('vakitAdi').innerText = "Yeni Gün Yükleniyor...";
+                    document.getElementById('kalanSure').innerText = "00:00:00";
+                    setTimeout(() => location.reload(), 30000); 
+                }
+            }, 1000);
+        }
+
+        vakitleriGetir();
+    </script>
+</body>
+</html>
