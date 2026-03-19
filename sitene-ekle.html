@@ -71,6 +71,17 @@
         .page-theme-box label { margin: 0; color: var(--text-color); }
         .page-theme-box select { margin: 0; padding: 8px 15px; width: auto; font-weight: bold; }
 
+        /* KONUM BUL BUTONU VE GRUP AYARI */
+        .location-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        .location-group select { margin-bottom: 0; flex: 1; }
+        .gps-btn {
+            display: flex; align-items: center; justify-content: center;
+            background: var(--input-bg); border: 1px solid var(--border-color);
+            color: var(--text-color); border-radius: 8px; cursor: pointer;
+            width: 48px; transition: 0.2s; font-size: 1.2em; padding: 0; margin-bottom: 0;
+        }
+        .gps-btn:hover { border-color: var(--accent); background: var(--panel-bg); }
+
         /* KUTULARIN HİZASINI DÜZELTEN AYAR: align-items: flex-end; EKLENDİ */
         .size-inputs { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-end; }
         .size-inputs div { flex: 1; display: flex; flex-direction: column; }
@@ -139,9 +150,12 @@
             <h2>⚙️ Widget Ayarları</h2>
             
             <label>📍 Şehir</label>
-            <select id="citySelect" onchange="loadDistricts()">
-                <option value="">Şehirler Yükleniyor...</option>
-            </select>
+            <div class="location-group">
+                <select id="citySelect" onchange="loadDistricts()">
+                    <option value="">Şehirler Yükleniyor...</option>
+                </select>
+                <button class="gps-btn" onclick="geolocateUser()" title="Otomatik Konum Bul">📍</button>
+            </div>
 
             <label>🏘️ İlçe</label>
             <select id="districtSelect" onchange="updateWidgetCode()">
@@ -169,11 +183,11 @@
 
             <div class="size-inputs">
                 <div>
-                    <label>Genişlik (Örn: 550px)</label>
+                    <label>Genişlik </label>
                     <input type="text" id="widgetWidth" value="550px" oninput="updateWidgetCode()">
                 </div>
                 <div>
-                    <label>Yükseklik (Örn: 250px)</label>
+                    <label>Yükseklik </label>
                     <input type="text" id="widgetHeight" value="250px" oninput="updateWidgetCode()">
                 </div>
             </div>
@@ -265,6 +279,42 @@
                 updateWidgetCode();
             } catch(e) { console.log("İlçeler yüklenemedi", e); }
         }
+
+        // --- YENİ EKLENEN GPS FONKSİYONU ---
+        async function geolocateUser() {
+            if (!navigator.geolocation) return alert("Tarayıcınız konum desteklemiyor.");
+            const btn = document.querySelector('.gps-btn'); 
+            const originalIcon = btn.innerText;
+            btn.innerText = "⏳";
+            
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
+                    const data = await res.json();
+                    const province = data.address.province || data.address.city || data.address.town;
+                    
+                    if(province) {
+                        const citySelect = document.getElementById('citySelect');
+                        const targetCity = province.replace(' Province', '').toLocaleUpperCase('tr-TR');
+                        for(let i=0; i<citySelect.options.length; i++) {
+                            if(citySelect.options[i].text.includes(targetCity)) {
+                                citySelect.selectedIndex = i; 
+                                await loadDistricts();
+                                alert("Konum başarıyla eşleşti: " + targetCity); 
+                                break;
+                            }
+                        }
+                    }
+                } catch(e) { 
+                    alert("Konum ağdan çözümlenemedi."); 
+                }
+                btn.innerText = originalIcon;
+            }, () => { 
+                alert("Konum izni verilmedi veya zaman aşımına uğradı."); 
+                btn.innerText = originalIcon; 
+            });
+        }
+        // ------------------------------------
 
         function updateWidgetCode() {
             const ilceId = document.getElementById('districtSelect').value;

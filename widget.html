@@ -62,6 +62,7 @@
         let vakitler = [];
         let yarinImsakDk = 0;
         let sesCalindi = false;
+        let aktifVakitId = null;
 
         function toMinutes(timeStr) {
             const [h, m] = timeStr.split(':').map(Number);
@@ -72,8 +73,23 @@
             try {
                 const res = await fetch('https://ezanvakti.emushaf.net/vakitler/' + ilceId);
                 const data = await res.json();
-                const bugun = data[0];
-                const yarin = data[1];
+                
+                // --- KRİTİK DÜZELTME BURASI ---
+                // Cihazın bugünkü tarihini tam olarak "GG.AA.YYYY" formatında alıyoruz
+                const now = new Date();
+                const todayStr = String(now.getDate()).padStart(2, '0') + '.' + 
+                                 String(now.getMonth() + 1).padStart(2, '0') + '.' + 
+                                 now.getFullYear();
+
+                // API'den gelen veriler içinde doğrudan bugünün tarihini arıyoruz
+                let bugunIndex = data.findIndex(d => d.MiladiTarihKisa === todayStr);
+                
+                // Eğer bulamazsa (API çökmüş veya ay bitmiş olabilir) ilk veriyi al
+                if (bugunIndex === -1) bugunIndex = 0; 
+                
+                const bugun = data[bugunIndex];
+                const yarin = data[bugunIndex + 1] || data[bugunIndex];
+                // ------------------------------
 
                 vakitler = [
                     { id: 'imsak', ad: 'İmsak', dk: toMinutes(bugun.Imsak), str: bugun.Imsak },
@@ -84,7 +100,7 @@
                     { id: 'yatsi', ad: 'Yatsı', dk: toMinutes(bugun.Yatsi), str: bugun.Yatsi }
                 ];
 
-                yarinImsakDk = toMinutes(yarin.Imsak) + 1440; // Yarının imsağı bugünden 1440 dakika sonra
+                yarinImsakDk = toMinutes(yarin.Imsak) + 1440;
 
                 const grid = document.getElementById('timesGrid');
                 grid.innerHTML = '';
@@ -97,32 +113,47 @@
         }
 
         function startTimer() {
+            const vakitAdiEl = document.getElementById('vakitAdi');
+            const kalanSureEl = document.getElementById('kalanSure');
+            const timeBoxes = document.querySelectorAll('.time-box');
+
             setInterval(() => {
                 const now = new Date();
                 const simdiDk = now.getHours() * 60 + now.getMinutes();
                 const simdiSn = now.getSeconds();
 
                 let siradaki = vakitler.find(v => v.dk > simdiDk);
-                let hedefDk, ad;
-
-                document.querySelectorAll('.time-box').forEach(b => b.classList.remove('active-time', 'past-time'));
+                let hedefDk, ad, yeniAktifId;
 
                 if (siradaki) {
                     hedefDk = siradaki.dk;
                     ad = siradaki.ad;
-                    document.getElementById(`box-${siradaki.id}`).classList.add('active-time');
-                    vakitler.forEach(v => { if (simdiDk >= v.dk) document.getElementById(`box-${v.id}`).classList.add('past-time'); });
+                    yeniAktifId = siradaki.id;
                 } else {
                     hedefDk = yarinImsakDk;
                     ad = "İmsak";
-                    document.getElementById('box-imsak').classList.add('active-time');
-                    vakitler.forEach(v => document.getElementById(`box-${v.id}`).classList.add('past-time'));
-                    document.getElementById('box-imsak').classList.remove('past-time');
+                    yeniAktifId = 'imsak';
                 }
 
-                document.getElementById('vakitAdi').innerText = ad + " Vaktine";
+                if (aktifVakitId !== yeniAktifId) {
+                    aktifVakitId = yeniAktifId;
+                    vakitAdiEl.innerText = ad + " Vaktine";
 
-                // Saniye bazlı net hesaplama
+                    timeBoxes.forEach(b => {
+                        b.classList.remove('active-time', 'past-time');
+                        const boxId = b.id.replace('box-', '');
+                        const boxVakit = vakitler.find(v => v.id === boxId);
+
+                        if (boxId === yeniAktifId) {
+                            b.classList.add('active-time');
+                        } else if (boxVakit && simdiDk >= boxVakit.dk && siradaki) {
+                            b.classList.add('past-time');
+                        } else if (!siradaki && boxId !== 'imsak') {
+                            b.classList.add('past-time');
+                        }
+                    });
+                }
+
                 let kalanSaniye = (hedefDk * 60) - (simdiDk * 60 + simdiSn);
                 if (kalanSaniye < 0) kalanSaniye = 0;
 
@@ -130,8 +161,13 @@
                 const m = String(Math.floor((kalanSaniye % 3600) / 60)).padStart(2, '0');
                 const s = String(kalanSaniye % 60).padStart(2, '0');
 
-                document.getElementById('kalanSure').innerText = `${h}:${m}:${s}`;
-                document.getElementById('kalanSure').className = (ad === 'Akşam' || ad === 'İmsak') ? 'countdown-timer color-green' : 'countdown-timer';
+                kalanSureEl.innerText = `${h}:${m}:${s}`;
+                
+                const isGreen = (ad === 'Akşam' || ad === 'İmsak');
+                const expectedClass = isGreen ? 'countdown-timer color-green' : 'countdown-timer';
+                if (kalanSureEl.className !== expectedClass) {
+                    kalanSureEl.className = expectedClass;
+                }
 
                 if (h === "00" && m === "00" && s === "00" && !sesCalindi) {
                     if (ses !== 'none') sesElementi.play().catch(() => {});
