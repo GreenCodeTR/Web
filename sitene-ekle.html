@@ -82,7 +82,6 @@
         }
         .gps-btn:hover { border-color: var(--accent); background: var(--panel-bg); }
 
-        /* KUTULARIN HİZASINI DÜZELTEN AYAR: align-items: flex-end; EKLENDİ */
         .size-inputs { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-end; }
         .size-inputs div { flex: 1; display: flex; flex-direction: column; }
         .size-inputs input { margin-bottom: 0; }
@@ -126,7 +125,7 @@
 <body data-theme="dark">
 
     <div class="top-bar">
-        <a href="https://webimsakiye.com.tr" class="back-btn">⬅ Ana Siteye Dön</a>
+        <a href="index.html" class="back-btn">⬅ Ana Siteye Dön</a>
         
         <div class="page-theme-box">
             <label>Sayfa Görünümü:</label>
@@ -145,10 +144,14 @@
     </div>
 
     <div class="container">
-        <!-- SOL PANEL: AYARLAR -->
         <div class="panel">
             <h2>⚙️ Widget Ayarları</h2>
             
+            <label>🌍 Ülke</label>
+            <select id="countrySelect" onchange="loadCities()">
+                <option value="">Ülkeler Yükleniyor...</option>
+            </select>
+
             <label>📍 Şehir</label>
             <div class="location-group">
                 <select id="citySelect" onchange="loadDistricts()">
@@ -209,11 +212,9 @@
             </select>
         </div>
 
-        <!-- SAĞ PANEL: ÖNİZLEME VE KOD -->
         <div class="panel">
             <h2>👁️ Canlı Önizleme</h2>
             <div class="preview-box">
-                <!-- Gerçek widget iframe olarak burada görünecek -->
                 <iframe id="previewFrame" src="" style="border:none; border-radius:12px; transition: width 0.3s, height 0.3s;"></iframe>
             </div>
 
@@ -242,9 +243,30 @@
             updateWidgetCode();
         }
 
-        async function loadCities() {
+        async function loadCountries() {
             try {
-                const res = await fetch('https://ezanvakti.emushaf.net/sehirler/2');
+                const res = await fetch('https://ezanvakti.emushaf.net/ulkeler');
+                const countries = await res.json();
+                const countrySelect = document.getElementById('countrySelect');
+                countrySelect.innerHTML = '';
+                
+                countries.forEach(c => {
+                    let opt = document.createElement('option');
+                    opt.value = c.UlkeID;
+                    opt.text = c.UlkeAdi;
+                    countrySelect.appendChild(opt);
+                });
+                
+                // Varsayılan Türkiye
+                countrySelect.value = "2"; 
+                await loadCities();
+            } catch(e) { console.log("Ülkeler yüklenemedi", e); }
+        }
+
+        async function loadCities() {
+            const countryId = document.getElementById('countrySelect').value;
+            try {
+                const res = await fetch('https://ezanvakti.emushaf.net/sehirler/' + countryId);
                 const cities = await res.json();
                 const citySelect = document.getElementById('citySelect');
                 citySelect.innerHTML = '';
@@ -256,7 +278,8 @@
                     citySelect.appendChild(opt);
                 });
                 
-                citySelect.value = "583";
+                citySelect.value = cities[0].SehirID;
+                if (countryId === "2") citySelect.value = "583"; // Türkiye için varsayılan İstanbul
                 await loadDistricts();
             } catch(e) { console.log("Şehirler yüklenemedi", e); }
         }
@@ -280,7 +303,6 @@
             } catch(e) { console.log("İlçeler yüklenemedi", e); }
         }
 
-        // --- YENİ EKLENEN GPS FONKSİYONU ---
         async function geolocateUser() {
             if (!navigator.geolocation) return alert("Tarayıcınız konum desteklemiyor.");
             const btn = document.querySelector('.gps-btn'); 
@@ -291,8 +313,21 @@
                 try {
                     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
                     const data = await res.json();
+                    
+                    const country = data.address.country ? data.address.country.toLocaleUpperCase('tr-TR') : null;
                     const province = data.address.province || data.address.city || data.address.town;
                     
+                    if(country) {
+                        const countrySelect = document.getElementById('countrySelect');
+                        for(let i=0; i<countrySelect.options.length; i++) {
+                            if(countrySelect.options[i].text.toLocaleUpperCase('tr-TR').includes(country) || country.includes(countrySelect.options[i].text.toLocaleUpperCase('tr-TR'))) {
+                                countrySelect.selectedIndex = i; 
+                                await loadCities(); 
+                                break;
+                            }
+                        }
+                    }
+
                     if(province) {
                         const citySelect = document.getElementById('citySelect');
                         const targetCity = province.replace(' Province', '').toLocaleUpperCase('tr-TR');
@@ -314,7 +349,6 @@
                 btn.innerText = originalIcon; 
             });
         }
-        // ------------------------------------
 
         function updateWidgetCode() {
             const ilceId = document.getElementById('districtSelect').value;
@@ -327,6 +361,7 @@
             if(!w) w = "550px";
             if(!h) h = "250px";
 
+            // NOT: BURADAKİ URL KENDİ DOMAIN'İN İLE DEĞİŞTİRİLEBİLİR
             const widgetUrl = `https://webimsakiye.com.tr/widget.html?ilce=${ilceId}&tema=${tema}&ses=${ses}`;
             const localPreviewUrl = `./widget.html?ilce=${ilceId}&tema=${tema}&ses=${ses}`;
 
@@ -361,7 +396,7 @@
             }, 2500);
         }
 
-        window.onload = loadCities;
+        window.onload = loadCountries;
     </script>
 </body>
 </html>
